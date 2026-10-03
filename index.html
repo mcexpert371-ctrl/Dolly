@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happy Birthday Countdown!</title>
+  <style>
+    :root {
+      --primary: #d63384;
+      --accent: #ff6b81;
+      --gold: #ffd700;
+      --bg-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-gradient);
+      color: #333;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 50px;
+    }
+
+    h1 {
+      margin-top: 30px;
+      font-size: 2.5rem;
+      color: var(--primary);
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    /* --- Countdown Timer --- */
+    .countdown-container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px 40px;
+      border-radius: 20px;
+      margin: 30px 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border: 2px solid #f8bbd0;
+    }
+
+    .countdown {
+      display: flex;
+      gap: 20px;
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .countdown div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .countdown span {
+      font-size: 0.9rem;
+      color: #666;
+      font-weight: normal;
+    }
+
+    /* --- LOCKED WRAPPER --- */
+    #surprise-wrapper {
+      display: none;
+      width: 100%;
+      max-width: 800px;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 1s forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- Step 1: Gift Box --- */
+    .gift-section {
+      margin: 20px 0;
+      cursor: pointer;
+    }
+
+    .gift-box {
+      font-size: 5.5rem;
+      animation: bounce 1.5s infinite alternate;
+      transition: transform 0.3s;
+    }
+
+    .gift-box:hover { transform: scale(1.15); }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-15px); }
+    }
+
+    /* --- Step 2: Animated Cake --- */
+    .cake-container {
+      display: none;
+      margin: 20px 0;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .cake {
+      font-size: 6rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    .flame {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 15px;
+      height: 25px;
+      background: orange;
+      border-radius: 50% 50% 20% 20%;
+      box-shadow: 0 0 15px orange, 0 0 25px yellow;
+      animation: flicker 0.6s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0.8; transform: translateX(-50%) scale(0.9); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+    }
+
+    /* --- Step 3: Photos One by One --- */
+    .photo-step-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .photo-card {
+      background: white;
+      padding: 15px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      width: 280px;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .photo-caption {
+      margin-top: 15px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      font-size: 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      background: #c2185b;
+    }
+
+    .music-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      border-radius: 25px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Music -->
+  <audio id="bg-music" loop preload="auto">
+    <source src="song.mp3" type="audio/mpeg">
+  </audio>
+
+  <h1 id="main-title">⏳ Waiting for the Big Day...</h1>
+  <p class="subtitle" id="instruction">The birthday surprise is locked until the timer reaches zero!</p>
+
+  <!-- 1. COUNTDOWN TIMER -->
+  <div class="countdown-container" id="countdown-card">
+    <div class="countdown">
+      <div><div id="days">00</div><span>Days</span></div>
+      <div><div id="hours">00</div><span>Hours</span></div>
+      <div><div id="minutes">00</div><span>Minutes</span></div>
+      <div><div id="seconds">00</div><span>Seconds</span></div>
+    </div>
+  </div>
+
+  <!-- 2. SURPRISE WRAPPER (Revealed when Countdown hits zero) -->
+  <div id="surprise-wrapper">
+    
+    <button class="music-btn" onclick="toggleMusic()">🎵 Play / Pause Music</button>
+
+    <!-- Gift Section -->
+    <div class="gift-section" id="gift-section" onclick="openGift()">
+      <div class="gift-box">🎁</div>
+      <p><strong>Tap to open your birthday surprise!</strong></p>
+    </div>
+
+    <!-- Cake Section -->
+    <div class="cake-container" id="cake-container" onclick="startPhotos()">
+      <div class="cake">
+        <div class="flame" id="flame"></div>
+        🎂
+      </div>
+      <p><strong>Make a wish and tap the cake to blow out the candle! 🕯️</strong></p>
+    </div>
+
+    <!-- One-by-One Personal Photos Container -->
+    <div class="photo-step-container" id="photo-step-container">
+      <div class="photo-card">
+        <img id="current-photo" src="photo1.jpg" alt="Personal Memory">
+        <div class="photo-caption" id="current-caption">Photo 1 Caption</div>
+      </div>
+      <button class="btn" id="next-photo-btn" onclick="nextPhoto()">Next Memory ✨</button>
+    </div>
+
+  </div>
+
+  <script>
+    // --- 1. Set Target Birthday Date & Time ---
+    const targetDate = new Date("2026-10-04T00:00:00").getTime(); 
+
+    // --- 2. Personal Photos Data (Customize captions here) ---
+    const photoData = [
+      { src: "photo1.jpg", caption: "Always a Angle 🌟" },
+      { src: "photo2.jpg", caption: "Always a Talented 😂" },
+      { src: "photo3.jpg", caption: "Happy Birthday To SIster 💖" }
+    ];
+
+    let currentPhotoIndex = 0;
+    const music = document.getElementById("bg-music");
+    let isPlaying = false;
+    let unlocked = false;
+
+    // --- Countdown Timer ---
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const difference = targetDate - now;
+
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        document.getElementById("days").innerText = days < 10 ? "0" + days : days;
+        document.getElementById("hours").innerText = hours < 10 ? "0" + hours : hours;
+        document.getElementById("minutes").innerText = minutes < 10 ? "0" + minutes : minutes;
+        document.getElementById("seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
+      } else {
+        if (!unlocked) {
+          unlocked = true;
+          unlockBirthdaySurprise();
+        }
+      }
+    }
+    const timerInterval = setInterval(updateCountdown, 1000);
+
+    function unlockBirthdaySurprise() {
+      clearInterval(timerInterval);
+      document.getElementById("main-title").innerText = "🎉 Happy Birthday! 🎂";
+      document.getElementById("instruction").innerText = "The wait is over! Unwrap your surprise below!";
+      document.getElementById("countdown-card").style.display = "none";
+      document.getElementById("surprise-wrapper").style.display = "flex";
+
+      music.play().then(() => { isPlaying = true; }).catch(err => console.log("Click to play audio"));
+    }
+
+    // --- Interactive Flow ---
+    function openGift() {
+      document.getElementById("gift-section").style.display = "none";
+      document.getElementById("cake-container").style.display = "block";
+    }
+
+    function startPhotos() {
+      document.getElementById("flame").style.display = "none"; // Blow out candle
+      setTimeout(() => {
+        document.getElementById("cake-container").style.display = "none";
+        document.getElementById("photo-step-container").style.display = "flex";
+        showPhoto(0);
+      }, 500);
+    }
+
+    function showPhoto(index) {
+      const photoEl = document.getElementById("current-photo");
+      const captionEl = document.getElementById("current-caption");
+      
+      photoEl.src = photoData[index].src;
+      captionEl.innerText = photoData[index].caption;
+
+      if (index === photoData.length - 1) {
+        document.getElementById("next-photo-btn").innerText = "Finish ✨";
+      }
+    }
+
+    function nextPhoto() {
+      currentPhotoIndex++;
+      if (currentPhotoIndex < photoData.length) {
+        showPhoto(currentPhotoIndex);
+      } else {
+        // Loop back or keep on final view
+        currentPhotoIndex = 0;
+        showPhoto(currentPhotoIndex);
+      }
+    }
+
+    function toggleMusic() {
+      if (isPlaying) {
+        music.pause();
+        document.querySelector(".music-btn").innerText = "🎵 Play Music";
+      } else {
+        music.play();
+        document.querySelector(".music-btn").innerText = "⏸️ Pause Music";
+      }
+      isPlaying = !isPlaying;
+    }
+  </script>
+</body>
+</html>
